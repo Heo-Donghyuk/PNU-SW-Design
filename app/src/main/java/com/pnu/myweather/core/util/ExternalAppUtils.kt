@@ -15,4 +15,12 @@ object ExternalAppUtils {
             Toast.makeText(context, "브라우저를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun shareText(context: Context, text: String) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        context.startActivity(Intent.createChooser(shareIntent, "공유하기"))
+    }
 }

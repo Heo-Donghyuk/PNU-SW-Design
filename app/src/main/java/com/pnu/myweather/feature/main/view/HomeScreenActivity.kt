@@ -70,6 +70,14 @@ fun HomeScreen(
                 .padding(16.dp)
         ) {
             Button(onClick = {
+                ExternalAppUtils.shareText(
+                    context,
+                    "이 텍스트를 공유해요"
+                )
+            }) {
+                Text("텍스트 공유 기능 테스트")
+            }
+            Button(onClick = {
                 ExternalAppUtils.openBrowser(
                     context,
                     "https://m.search.naver.com/search.naver?query=부산광역시 금정구 날씨"
