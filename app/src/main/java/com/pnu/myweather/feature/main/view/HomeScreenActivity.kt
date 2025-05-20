@@ -18,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pnu.myweather.core.util.ExternalAppUtils
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
 import com.pnu.myweather.feature.setting.view.SettingScreenActivity
 
@@ -45,6 +47,7 @@ fun HomeScreen(
     onGoToBriefing: () -> Unit,
     onGoToSetting: () -> Unit
 ) {
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -66,6 +69,22 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Button(onClick = {
+                ExternalAppUtils.shareText(
+                    context,
+                    "이 텍스트를 공유해요"
+                )
+            }) {
+                Text("텍스트 공유 기능 테스트")
+            }
+            Button(onClick = {
+                ExternalAppUtils.openBrowser(
+                    context,
+                    "https://m.search.naver.com/search.naver?query=부산광역시 금정구 날씨"
+                )
+            }) {
+                Text("상세보기")
+            }
             Button(onClick = onGoToBriefing) {
                 Text("브리핑")
             }
