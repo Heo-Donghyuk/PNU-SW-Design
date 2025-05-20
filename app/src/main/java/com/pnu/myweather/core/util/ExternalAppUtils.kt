@@ -9,7 +9,9 @@ object ExternalAppUtils {
 
     fun openBrowser(context: Context, url: String) {
         try {
-            val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
+            val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // 여기
+            }
             context.startActivity(browserIntent)
         } catch (e: Exception) {
             Toast.makeText(context, "브라우저를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
