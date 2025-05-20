@@ -50,7 +50,9 @@ android {
 }
 
 dependencies {
-
+    // Custom
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    // Default
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
