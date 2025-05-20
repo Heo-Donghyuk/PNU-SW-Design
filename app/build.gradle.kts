@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.pnu.myweather"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pnu.myweather"
