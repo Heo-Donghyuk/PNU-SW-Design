@@ -17,11 +17,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pnu.myweather.core.util.ExternalAppUtils
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
+import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
 import com.pnu.myweather.feature.setting.view.SettingScreenActivity
 
 class HomeScreenActivity : ComponentActivity() {
@@ -29,7 +33,9 @@ class HomeScreenActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val homeViewModel: HomeViewModel = viewModel()
             HomeScreen(
+                viewModel = homeViewModel,
                 onGoToBriefing = {
                     startActivity(Intent(this, BriefingScreenActivity::class.java))
                 },
@@ -44,10 +50,13 @@ class HomeScreenActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel,
     onGoToBriefing: () -> Unit,
     onGoToSetting: () -> Unit
 ) {
     val context = LocalContext.current
+    val naverWeatherUrl by viewModel.naverWeatherUrl.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -80,7 +89,7 @@ fun HomeScreen(
             Button(onClick = {
                 ExternalAppUtils.openBrowser(
                     context,
-                    "https://m.search.naver.com/search.naver?query=부산광역시 금정구 날씨"
+                    naverWeatherUrl
                 )
             }) {
                 Text("상세보기")
