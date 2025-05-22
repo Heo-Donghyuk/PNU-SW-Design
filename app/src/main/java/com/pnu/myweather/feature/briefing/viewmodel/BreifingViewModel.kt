@@ -3,13 +3,10 @@ package com.pnu.myweather.feature.briefing.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.pnu.myweather.core.gemma.GemmaModelLoader
-import com.pnu.myweather.core.gemma.GemmaSessionManager
+import com.pnu.myweather.core.gemma.GemmaSessionHolder
 import com.pnu.myweather.core.gemma.GemmaState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 class BreifingViewModel(
     application: Application,
@@ -18,15 +15,12 @@ class BreifingViewModel(
     val gemmaState: StateFlow<GemmaState> = _gemmaState
 
     init {
-        viewModelScope.launch {
-            _gemmaState.value = GemmaState.Loading
-            try {
-                val session = GemmaModelLoader.loadModel(application, "gemma3-1B-it-int4.task")
-                _gemmaState.value = GemmaState.Ready(GemmaSessionManager(session))
-            } catch (e: Exception) {
-                Log.e("BreifingViewModel", "Model load error ${e.message}", e)
-                _gemmaState.value = GemmaState.Error
-            }
+        val sessionManager = GemmaSessionHolder.sessionManager
+        if (sessionManager != null) {
+            _gemmaState.value = GemmaState.Ready(sessionManager)
+        } else {
+            _gemmaState.value = GemmaState.Error
+            Log.e("BreifingViewModel", "SessionManager was null! Did you forget to preload it?")
         }
     }
 
