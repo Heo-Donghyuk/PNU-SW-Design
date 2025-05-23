@@ -52,6 +52,8 @@ android {
 dependencies {
     // Custom
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("com.google.mediapipe:tasks-genai:0.10.22")
+
     // Default
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
