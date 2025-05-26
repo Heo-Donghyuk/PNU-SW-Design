@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object WeatherApiClient {
-    private const val BASE_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/"
+    private const val BASE_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/"
 
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()

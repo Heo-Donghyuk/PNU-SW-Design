@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,13 +18,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pnu.myweather.BuildConfig
 import com.pnu.myweather.core.util.ExternalAppUtils
+import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
 import com.pnu.myweather.feature.setting.view.SettingScreenActivity
@@ -56,6 +60,15 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val naverWeatherUrl by viewModel.naverWeatherUrl.collectAsState()
+    val weatherState by viewModel.weatherState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchWeather(
+            baseDate = "20250526", // TODO: 수정 필요
+            baseTime = "0500",     // TODO: 수정 필요
+            nx = 98, ny = 76       // ex) 장전동 (부산 금정구)
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -78,6 +91,29 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            when (weatherState) {
+                is WeatherUiState.Loading -> {
+                    Text("날씨 불러오는 중...")
+                }
+
+                is WeatherUiState.Error -> {
+                    Text(BuildConfig.WEATHER_API_KEY)
+                    Text("에러 발생: ${(weatherState as WeatherUiState.Error).message}")
+                }
+
+                is WeatherUiState.Success -> {
+                    val items = (weatherState as WeatherUiState.Success).items
+
+                    Text("날씨 정보 (${items.size}개):")
+                    items.take(5).forEach { item ->  // 예시로 5개만 출력
+                        Text(
+                            text = "${item.fcstDate} ${item.fcstTime} | ${item.category} = ${item.fcstValue}"
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.padding(top = 16.dp))
             Button(onClick = {
                 ExternalAppUtils.shareText(
                     context,
