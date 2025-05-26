@@ -1,4 +1,8 @@
-val weatherApiKey: String by project
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    load(File(rootProject.projectDir, "local.properties").inputStream())
+}
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -25,7 +29,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
+        buildConfigField("String", "WEATHER_API_KEY", "\"${localProperties["WEATHER_API_KEY"]}\"")
     }
 
     buildTypes {
@@ -46,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
