@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pnu.myweather.BuildConfig
 import com.pnu.myweather.core.util.ExternalAppUtils
+import com.pnu.myweather.core.util.getLatestBaseDateTime
 import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
@@ -61,11 +62,12 @@ fun HomeScreen(
     val context = LocalContext.current
     val naverWeatherUrl by viewModel.naverWeatherUrl.collectAsState()
     val weatherState by viewModel.weatherState.collectAsState()
-
+    val (baseDate, baseTime) = getLatestBaseDateTime()
     LaunchedEffect(Unit) {
+
         viewModel.fetchWeather(
-            baseDate = "20250526", // TODO: 수정 필요
-            baseTime = "0500",     // TODO: 수정 필요
+            baseDate = baseDate,
+            baseTime = baseTime,
             nx = 98, ny = 76       // ex) 장전동 (부산 금정구)
         )
     }
@@ -91,6 +93,8 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Text(baseDate)
+            Text(baseTime)
             when (weatherState) {
                 is WeatherUiState.Loading -> {
                     Text("날씨 불러오는 중...")
@@ -105,7 +109,7 @@ fun HomeScreen(
                     val items = (weatherState as WeatherUiState.Success).items
 
                     Text("날씨 정보 (${items.size}개):")
-                    items.take(5).forEach { item ->  // 예시로 5개만 출력
+                    items.forEach { item ->  // 예시로 5개만 출력
                         Text(
                             text = "${item.fcstDate} ${item.fcstTime} | ${item.category} = ${item.fcstValue}"
                         )
