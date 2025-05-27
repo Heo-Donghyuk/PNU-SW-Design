@@ -154,7 +154,7 @@ fun BriefingScreen(
                 is GemmaState.Ready -> {
                     val scrollableState = rememberScrollState()
 
-                    val prompt = PromptProvider.getFullPrompt(weatherSummary)
+                    val prompt = PromptProvider.getFullPrompt(context, weatherSummary)
                     val localSessionManager = state.sessionManager
                     val response by localSessionManager.response.collectAsState()
                     val isResponding by localSessionManager.responding.collectAsState()

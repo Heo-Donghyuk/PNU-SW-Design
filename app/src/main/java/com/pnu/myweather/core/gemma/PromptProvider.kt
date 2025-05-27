@@ -1,43 +1,13 @@
 package com.pnu.myweather.core.gemma
 
+import android.content.Context
 import com.pnu.myweather.core.weather.WeatherSummary
+import java.io.File
 
 object PromptProvider {
-    fun getFullPrompt(current: WeatherSummary?): String {
-        return getDefaultPrompt() + getWeatherBriefingPrompt(current)
+    fun getFullPrompt(context: Context, current: WeatherSummary?): String {
+        return loadPrompt(context) + getWeatherBriefingPrompt(current)
     }
-
-    fun getDefaultPrompt(): String = """
-        You are an assistant that creates a short, helpful weather briefing in Korean based on today's and tomorrow's weather data.
-
-        Instructions:
-        - Write the briefing in Korean, using a friendly but not overly dramatic tone.
-        - The length should be around 200 characters in Korean.
-        - Include the following information clearly:
-          - current temperature (현재 기온)
-          - today's and tomorrow's high/low temperatures (최고기온, 최저기온)
-          - precipitation probability (강수확률)
-          - keywords like 오늘, 내일, 현재 must appear
-        - If the temperature difference between high and low is 10°C or more, mention that the temperature range is large (일교차가 크다).
-        - If precipitation probability is 60% or more, remind users to bring an umbrella.
-        - If precipitation probability is low and the sky is clear, recommend outdoor activities.
-        - Do not mention an umbrella if the chance of rain is 10% or less.
-        - Do not mention temperature variation warnings if the difference is less than 10°C.
-        - 답변의 첫 문장은 '안녕하세요 오늘의 날씨 브리핑을 알려드립니다'로 시작해야 한다.
-        - 답변의 마지막 문장은 '지금까지 날씨 브리핑이었습니다.'로 끝나야 한다.
-        - 답변의 문장 사이에는 줄 바꿈이 있어야 한다.
-        
-        Example output (in Korean):
-        안녕하세요 오늘의 날씨 브리핑을 알려드립니다.
-        현재 기온은 21도로 맑은 날씨입니다.
-        오늘의 최고 기온은 28도, 최저 기온은 16도로 일교차가 크니 겉옷을 챙기시는 편이 좋겠습니다. 
-        강수확률은 0%로 비가 올 확률은 낮으며 야외 활동하기에 좋은 날씨입니다.
-        지금까지 날씨 브리핑이었습니다.
-
-        Now, generate a Korean weather briefing based on the following data:
-        
-        
-    """.trimIndent()
 
     fun getWeatherBriefingPrompt(current: WeatherSummary?): String {
         fun WeatherSummary?.describe(prefix: String): String {
@@ -56,5 +26,31 @@ object PromptProvider {
         return listOf(
             current.describe("현재"),
         ).joinToString("\n\n")
+    }
+
+    private const val FILE_NAME = "editable_prompt.txt"
+
+    fun loadPrompt(context: Context): String {
+        val file = File(context.filesDir, FILE_NAME)
+
+        if (!file.exists()) {
+            // 기본 프롬프트로 초기화
+            val defaultPrompt = context.assets.open("prompt/default_prompt.txt")
+                .bufferedReader().use { it.readText() }
+            file.writeText(defaultPrompt)
+            return defaultPrompt
+        }
+
+        return file.readText()
+    }
+
+    fun savePrompt(context: Context, prompt: String) {
+        File(context.filesDir, FILE_NAME).writeText(prompt)
+    }
+
+    fun resetPrompt(context: Context) {
+        val defaultPrompt = context.assets.open("prompt/default_prompt.txt")
+            .bufferedReader().use { it.readText() }
+        File(context.filesDir, FILE_NAME).writeText(defaultPrompt)
     }
 }
