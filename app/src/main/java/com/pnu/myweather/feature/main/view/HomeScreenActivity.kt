@@ -30,6 +30,7 @@ import com.pnu.myweather.core.util.ExternalAppUtils
 import com.pnu.myweather.core.util.getLatestBaseDateTime
 import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
+import com.pnu.myweather.feature.developer.view.DeveloperScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
 import com.pnu.myweather.feature.setting.view.SettingScreenActivity
 
@@ -81,7 +82,11 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MyWeather") },
+                title = {
+                    SecretAppBarTitle("Weather") {
+                        context.startActivity(Intent(context, DeveloperScreenActivity::class.java))
+                    }
+                },
                 actions = {
                     IconButton(onClick = onGoToSetting) {
                         Icon(
