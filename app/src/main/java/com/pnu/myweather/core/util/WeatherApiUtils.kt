@@ -1,13 +1,10 @@
 package com.pnu.myweather.core.util
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @SuppressLint("DefaultLocale")
-@RequiresApi(Build.VERSION_CODES.O)
 fun getLatestBaseDateTime(): Pair<String, String> {
     val now = LocalDateTime.now()
     val timeTable = listOf(2, 5, 8, 11, 14, 17, 20, 23)
@@ -26,4 +23,23 @@ fun getLatestBaseDateTime(): Pair<String, String> {
     val baseTime = String.format("%02d00", baseHour) // ex) "1400"
 
     return baseDate to baseTime
+}
+
+fun getWeatherDescription(sky: String, pty: String): String {
+    return when (pty) {
+        "0" -> { // 강수 없음 → 하늘 상태 기준
+            when (sky) {
+                "1" -> "맑음"
+                "3" -> "구름 많음"
+                "4" -> "흐림"
+                else -> "알 수 없음"
+            }
+        }
+
+        "1" -> "비"
+        "2" -> "비 또는 눈"
+        "3" -> "눈"
+        "4" -> "소나기"
+        else -> "강수 정보 없음"
+    }
 }
