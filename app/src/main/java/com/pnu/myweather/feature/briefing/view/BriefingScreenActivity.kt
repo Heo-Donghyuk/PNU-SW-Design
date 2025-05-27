@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pnu.myweather.core.gemma.GemmaState
 import com.pnu.myweather.core.gemma.PromptProvider
+import com.pnu.myweather.core.weather.WeatherSummary
 import com.pnu.myweather.feature.briefing.viewmodel.BreifingViewModel
 
 class BriefingScreenActivity : ComponentActivity() {
@@ -47,10 +48,14 @@ class BriefingScreenActivity : ComponentActivity() {
                 }
             }
         ).get(BreifingViewModel::class.java)
+
+        val weatherSummary = intent.getParcelableExtra<WeatherSummary>("weatherSummary")
+
         setContent {
             BriefingScreen(
                 viewModel = viewModel(),
-                onGoBack = { finish() }
+                onGoBack = { finish() },
+                weatherSummary = weatherSummary,
             )
         }
     }
@@ -58,7 +63,11 @@ class BriefingScreenActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
+fun BriefingScreen(
+    viewModel: BreifingViewModel,
+    onGoBack: () -> Unit,
+    weatherSummary: WeatherSummary?,
+) {
     val gemmaState by viewModel.gemmaState.collectAsStateWithLifecycle()
 
     Scaffold(topBar = {
@@ -103,13 +112,14 @@ fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
                 }
 
                 is GemmaState.Ready -> {
-                    val prompt = PromptProvider.getDefaultPrompt() // [TODO] 날씨 데이터 추가 필요
+                    val prompt = PromptProvider.getFullPrompt(weatherSummary)
 
                     val scrollableState = rememberScrollState()
                     val sessionManager = state.sessionManager
                     val response by sessionManager.response.collectAsState()
                     val isResponding by sessionManager.responding.collectAsState()
 
+                    Text(prompt)
                     Column(
                         modifier = Modifier
                             .verticalScroll(scrollableState)
@@ -123,7 +133,10 @@ fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
-                            onClick = { sessionManager.sendQuery(prompt) },
+                            onClick = {
+                                print(prompt)
+                                sessionManager.sendQuery(prompt)
+                            },
                             enabled = !isResponding,
                             modifier = Modifier.fillMaxWidth()
                         ) {

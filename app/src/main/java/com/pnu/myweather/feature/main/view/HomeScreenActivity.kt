@@ -42,7 +42,12 @@ class HomeScreenActivity : ComponentActivity() {
             HomeScreen(
                 viewModel = homeViewModel,
                 onGoToBriefing = {
-                    startActivity(Intent(this, BriefingScreenActivity::class.java))
+                    val weatherSummary = homeViewModel.weatherSummary.value
+                    val intent = Intent(this, BriefingScreenActivity::class.java).apply {
+                        putExtra("weatherSummary", weatherSummary)
+                        // TODO: tomorrowSummary도 필요하면 같이 넣기
+                    }
+                    startActivity(intent)
                 },
                 onGoToSetting = {
                     startActivity(Intent(this, SettingScreenActivity::class.java))
