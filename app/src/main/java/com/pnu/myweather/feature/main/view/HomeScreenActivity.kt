@@ -62,6 +62,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val naverWeatherUrl by viewModel.naverWeatherUrl.collectAsState()
     val weatherState by viewModel.weatherState.collectAsState()
+    val weatherSummary by viewModel.weatherSummary.collectAsState()
     val (baseDate, baseTime) = getLatestBaseDateTime()
     LaunchedEffect(Unit) {
 
@@ -95,6 +96,7 @@ fun HomeScreen(
         ) {
             Text(baseDate)
             Text(baseTime)
+
             when (weatherState) {
                 is WeatherUiState.Loading -> {
                     Text("날씨 불러오는 중...")
@@ -106,13 +108,14 @@ fun HomeScreen(
                 }
 
                 is WeatherUiState.Success -> {
-                    val items = (weatherState as WeatherUiState.Success).items
-
-                    Text("날씨 정보 (${items.size}개):")
-                    items.forEach { item ->  // 예시로 5개만 출력
-                        Text(
-                            text = "${item.fcstDate} ${item.fcstTime} | ${item.category} = ${item.fcstValue}"
-                        )
+                    weatherSummary?.let {
+                        Text("현재 기온: ${it.temperature}")
+                        Text("하늘 상태: ${it.skyState}")
+                        Text("최고 기온: ${it.maxTemp}")
+                        Text("최저 기온: ${it.minTemp}")
+                        Text("습도: ${it.humidity}")
+                        Text("강수 확률: ${it.precipitation}")
+                        Spacer(modifier = Modifier.padding(top = 16.dp))
                     }
                 }
             }
