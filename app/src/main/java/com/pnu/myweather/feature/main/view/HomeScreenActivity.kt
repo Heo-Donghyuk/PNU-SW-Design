@@ -142,7 +142,7 @@ fun HomeScreen(
             }) {
                 Text("상세보기")
             }
-            Button(onClick = onGoToBriefing) {
+            Button(onClick = onGoToBriefing, enabled = weatherState is WeatherUiState.Success) {
                 Text("브리핑")
             }
         }
