@@ -1,9 +1,16 @@
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    load(File(rootProject.projectDir, "local.properties").inputStream())
+}
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     //id("com.android.application")
     id("com.google.gms.google-services")
     alias(libs.plugins.compose.compiler)
+    id("kotlin-parcelize")
 
 }
 
@@ -13,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.pnu.myweather"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -22,6 +29,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "WEATHER_API_KEY", "\"${localProperties["WEATHER_API_KEY"]}\"")
     }
 
     buildTypes {
@@ -42,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -57,6 +67,10 @@ dependencies {
     // Custom
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("com.google.mediapipe:tasks-genai:0.10.22")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
 
     // Default
     implementation(libs.androidx.core.ktx)

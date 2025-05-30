@@ -25,6 +25,8 @@
         <activity android:name=".feature.main.view.HomeScreenActivity" />
         <activity android:name=".feature.setting.view.SettingScreenActivity" />
         <activity android:name=".feature.briefing.view.BriefingScreenActivity" />
+        <activity android:name=".feature.developer.view.DeveloperScreenActivity" />
+        <activity android:name=".feature.developer.view.PromptEditActivity" />
     </application>
 
 </manifest>

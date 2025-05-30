@@ -16,7 +16,7 @@ object GemmaModelLoader {
 
         val interfaceOptions = LlmInference.LlmInferenceOptions.builder()
             .setModelPath(destinationFile.absolutePath)
-            .setMaxTokens(1000)
+            .setMaxTokens(2000)
             .setPreferredBackend(LlmInference.Backend.CPU)
             .build()
 

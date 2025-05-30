@@ -1,6 +1,7 @@
 package com.pnu.myweather.feature.briefing.view
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,10 +25,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -34,6 +41,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pnu.myweather.core.gemma.GemmaState
 import com.pnu.myweather.core.gemma.PromptProvider
+import com.pnu.myweather.core.util.ExternalAppUtils
+import com.pnu.myweather.core.weather.WeatherSummary
 import com.pnu.myweather.feature.briefing.viewmodel.BreifingViewModel
 
 class BriefingScreenActivity : ComponentActivity() {
@@ -47,10 +56,14 @@ class BriefingScreenActivity : ComponentActivity() {
                 }
             }
         ).get(BreifingViewModel::class.java)
+
+        val weatherSummary = intent.getParcelableExtra<WeatherSummary>("weatherSummary")
+
         setContent {
             BriefingScreen(
                 viewModel = viewModel(),
-                onGoBack = { finish() }
+                onGoBack = { finish() },
+                weatherSummary = weatherSummary,
             )
         }
     }
@@ -58,8 +71,29 @@ class BriefingScreenActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
+fun BriefingScreen(
+    viewModel: BreifingViewModel,
+    onGoBack: () -> Unit,
+    weatherSummary: WeatherSummary?,
+) {
+    val context = LocalContext.current
     val gemmaState by viewModel.gemmaState.collectAsStateWithLifecycle()
+
+    var currentResponse by remember { mutableStateOf("") }
+    var currentIsResponding by remember { mutableStateOf(false) }
+
+    when (val state = gemmaState) {
+        is GemmaState.Ready -> {
+            val localSessionManager = state.sessionManager
+            currentResponse = localSessionManager.response.collectAsState().value
+            currentIsResponding = localSessionManager.responding.collectAsState().value
+        }
+
+        else -> {
+            currentResponse = ""
+            currentIsResponding = false
+        }
+    }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -71,6 +105,22 @@ fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
                         contentDescription = "뒤로 가기"
                     )
                 }
+            },
+            actions = {
+                IconButton(
+                    onClick = {
+                        ExternalAppUtils.shareText(
+                            context,
+                            currentResponse
+                        )
+                    },
+                    enabled = currentResponse.isNotEmpty() && !currentIsResponding
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Share,
+                        contentDescription = "공유"
+                    )
+                }
             }
         )
     }) { innerPadding ->
@@ -80,10 +130,9 @@ fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Text("☁️ Briefing Screen")
             when (val state = gemmaState) {
                 is GemmaState.Idle -> {
-                    Text("Hello World")
+                    Text("GemmaState Idle")
                 }
 
                 is GemmaState.Loading -> {
@@ -103,12 +152,19 @@ fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
                 }
 
                 is GemmaState.Ready -> {
-                    val prompt = PromptProvider.getDefaultPrompt() // [TODO] 날씨 데이터 추가 필요
-
                     val scrollableState = rememberScrollState()
-                    val sessionManager = state.sessionManager
-                    val response by sessionManager.response.collectAsState()
-                    val isResponding by sessionManager.responding.collectAsState()
+
+                    val prompt = PromptProvider.getFullPrompt(context, weatherSummary)
+                    val localSessionManager = state.sessionManager
+                    val response by localSessionManager.response.collectAsState()
+                    val isResponding by localSessionManager.responding.collectAsState()
+
+                    LaunchedEffect(prompt) {
+                        if (!isResponding) {
+                            Log.d("[Gemma Prompt]", prompt)
+                            localSessionManager.sendQuery(prompt)
+                        }
+                    }
 
                     Column(
                         modifier = Modifier
@@ -123,11 +179,14 @@ fun BriefingScreen(viewModel: BreifingViewModel, onGoBack: () -> Unit) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
-                            onClick = { sessionManager.sendQuery(prompt) },
+                            onClick = {
+                                Log.d("[Gemma Prompt]", prompt)
+                                localSessionManager.sendQuery(prompt)
+                            },
                             enabled = !isResponding,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("머신러닝 테스트")
+                            Text("브리핑 생성")
                         }
                     }
                 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,14 +18,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pnu.myweather.BuildConfig
 import com.pnu.myweather.core.util.ExternalAppUtils
+import com.pnu.myweather.core.util.getLatestBaseDateTime
+import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
+import com.pnu.myweather.feature.developer.view.DeveloperScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
 import com.pnu.myweather.feature.setting.view.SettingScreenActivity
 
@@ -37,7 +43,12 @@ class HomeScreenActivity : ComponentActivity() {
             HomeScreen(
                 viewModel = homeViewModel,
                 onGoToBriefing = {
-                    startActivity(Intent(this, BriefingScreenActivity::class.java))
+                    val weatherSummary = homeViewModel.weatherSummary.value
+                    val intent = Intent(this, BriefingScreenActivity::class.java).apply {
+                        putExtra("weatherSummary", weatherSummary)
+                        // TODO: tomorrowSummary도 필요하면 같이 넣기
+                    }
+                    startActivity(intent)
                 },
                 onGoToSetting = {
                     startActivity(Intent(this, SettingScreenActivity::class.java))
@@ -56,11 +67,26 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val naverWeatherUrl by viewModel.naverWeatherUrl.collectAsState()
+    val weatherState by viewModel.weatherState.collectAsState()
+    val weatherSummary by viewModel.weatherSummary.collectAsState()
+    val (baseDate, baseTime) = getLatestBaseDateTime()
+    LaunchedEffect(Unit) {
+
+        viewModel.fetchWeather(
+            baseDate = baseDate,
+            baseTime = baseTime,
+            nx = 98, ny = 76       // ex) 장전동 (부산 금정구)
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MyWeather") },
+                title = {
+                    SecretAppBarTitle("Weather") {
+                        context.startActivity(Intent(context, DeveloperScreenActivity::class.java))
+                    }
+                },
                 actions = {
                     IconButton(onClick = onGoToSetting) {
                         Icon(
@@ -78,6 +104,33 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Text(baseDate)
+            Text(baseTime)
+
+            when (weatherState) {
+                is WeatherUiState.Loading -> {
+                    Text("날씨 불러오는 중...")
+                }
+
+                is WeatherUiState.Error -> {
+                    Text(BuildConfig.WEATHER_API_KEY)
+                    Text("에러 발생: ${(weatherState as WeatherUiState.Error).message}")
+                }
+
+                is WeatherUiState.Success -> {
+                    weatherSummary?.let {
+                        Text("현재 기온: ${it.temperature}")
+                        Text("하늘 상태: ${it.skyState}")
+                        Text("최고 기온: ${it.maxTemp}")
+                        Text("최저 기온: ${it.minTemp}")
+                        Text("습도: ${it.humidity}")
+                        Text("강수 확률: ${it.precipitation}")
+                        Spacer(modifier = Modifier.padding(top = 16.dp))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.padding(top = 16.dp))
             Button(onClick = {
                 ExternalAppUtils.shareText(
                     context,
@@ -94,7 +147,7 @@ fun HomeScreen(
             }) {
                 Text("상세보기")
             }
-            Button(onClick = onGoToBriefing) {
+            Button(onClick = onGoToBriefing, enabled = weatherState is WeatherUiState.Success) {
                 Text("브리핑")
             }
         }
