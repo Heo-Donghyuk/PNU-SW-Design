@@ -135,15 +135,12 @@ fun HomeScreen(
                         }
 
                         is WeatherUiState.Success -> {
-                            weatherSummary?.let {
-                                Text("현재 기온: ${it.temperature}")
-                                Text("하늘 상태: ${it.skyState}")
-                                Text("최고 기온: ${it.maxTemp}")
-                                Text("최저 기온: ${it.minTemp}")
-                                Text("습도: ${it.humidity}")
-                                Text("강수 확률: ${it.precipitation}")
-
-                            }
+                            WeatherCard(
+                                weatherSummary = weatherSummary,
+                                location = "임시위치",
+                                fineDust = "임시",
+                                ultraFineDust = "임시",
+                            )
                         }
                     }
                 }

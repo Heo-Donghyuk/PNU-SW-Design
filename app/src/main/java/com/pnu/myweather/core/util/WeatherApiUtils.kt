@@ -1,6 +1,7 @@
 package com.pnu.myweather.core.util
 
 import android.annotation.SuppressLint
+import com.pnu.myweather.R
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -41,5 +42,18 @@ fun getWeatherDescription(sky: String, pty: String): String {
         "3" -> "눈"
         "4" -> "소나기"
         else -> "강수 정보 없음"
+    }
+}
+
+fun getWeatherIconRes(skyState: String?): Int {
+    return when (skyState) {
+        "맑음" -> R.drawable.clear
+        "구름 많음" -> R.drawable.partly_cloudy
+        "흐림" -> R.drawable.cloudy
+        "비" -> R.drawable.rain
+        "비 또는 눈" -> R.drawable.rain_or_snow
+        "눈" -> R.drawable.snow
+        "소나기" -> R.drawable.shower
+        else -> R.drawable.cloudy // fallback 기본값
     }
 }
