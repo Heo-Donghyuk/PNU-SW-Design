@@ -1,6 +1,7 @@
 package com.pnu.myweather.feature.main.view
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,10 +21,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pnu.myweather.core.util.ExternalAppUtils.openBrowser
 import com.pnu.myweather.core.util.getWeatherIconRes
 import com.pnu.myweather.core.weather.WeatherSummary
 
@@ -33,89 +38,111 @@ fun WeatherCard(
     location: String,
     fineDust: String,
     ultraFineDust: String,
+    weatherURL: String,
 ) {
-    Row(
+    val context = LocalContext.current
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // 왼쪽 정보 카드
-        Column(
-            modifier = Modifier
-                .weight(1f)
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // 지역명(지역명)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(location, fontWeight = FontWeight.Bold)
+            // 좌측 정보
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Place,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(location, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    weatherSummary?.temperature ?: "--",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 64.sp
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    weatherSummary?.skyState ?: "--",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    "${weatherSummary?.maxTemp ?: "--"} / ${weatherSummary?.minTemp ?: "--"}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Outlined.WaterDrop,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(weatherSummary?.humidity ?: "--")
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Icon(
+                        Icons.Outlined.Umbrella,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(weatherSummary?.precipitation ?: "--")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text("미세먼지 $fineDust", fontSize = 16.sp)
+                Text("초미세먼지 $ultraFineDust", fontSize = 16.sp)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 현재 기온
-            Text(
-                weatherSummary?.temperature ?: "--",
-                fontWeight = FontWeight.Bold,
-                fontSize = 64.sp
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // 하늘 상태
-            Text(
-                weatherSummary?.skyState ?: "--",
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // 최고/최저 기온
-            Text(
-                "${weatherSummary?.maxTemp ?: "--"} / ${weatherSummary?.minTemp ?: "--"}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 습도 및 강수
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Outlined.WaterDrop,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+            // 우측 아이콘
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(Alignment.CenterVertically),
+                contentAlignment = Alignment.Center
+            ) {
+                val iconRes = getWeatherIconRes(weatherSummary?.skyState)
+                Image(
+                    painter = painterResource(id = iconRes),
+                    contentDescription = "날씨 아이콘",
+                    modifier = Modifier.fillMaxSize(0.9f)
                 )
-                Text(weatherSummary?.humidity ?: "--")
-                Spacer(modifier = Modifier.width(12.dp))
-                Icon(
-                    Icons.Outlined.Umbrella,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(weatherSummary?.precipitation ?: "--")
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 미세먼지 정보
-            Text("미세먼지 $fineDust")
-            Text("초미세먼지 $ultraFineDust")
         }
 
-        // 오른쪽 날씨 아이콘
-        Box(
+        // 하단 "상세보기"
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "상세보기",
             modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.CenterVertically),
-            contentAlignment = Alignment.Center
-        ) {
-            val iconRes = getWeatherIconRes(weatherSummary?.skyState)
-            Image(
-                painter = painterResource(id = iconRes),
-                contentDescription = "날씨 아이콘",
-                modifier = Modifier.fillMaxSize(0.9f)
-            )
-        }
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    openBrowser(
+                        context = context,
+                        weatherURL
+                    )
+                },
+            color = Color.Gray,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }

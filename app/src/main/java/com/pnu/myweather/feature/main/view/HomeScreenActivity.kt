@@ -138,6 +138,7 @@ fun HomeScreen(
                                 location = "임시위치",
                                 fineDust = "임시",
                                 ultraFineDust = "임시",
+                                weatherURL = naverWeatherUrl
                             )
                         }
                     }
