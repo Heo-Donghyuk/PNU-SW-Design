@@ -8,8 +8,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.pnu.myweather.ui.theme.White
 
 @Composable
 fun Card(
@@ -17,14 +17,14 @@ fun Card(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFB)),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = White),
         modifier = modifier
-            .padding(16.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        content()
+        androidx.compose.foundation.layout.Box(modifier = Modifier.padding(16.dp)) {
+            content()
+        }
     }
 }
