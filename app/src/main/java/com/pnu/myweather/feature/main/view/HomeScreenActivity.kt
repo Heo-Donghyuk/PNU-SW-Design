@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,9 +31,12 @@ import com.pnu.myweather.core.util.ExternalAppUtils
 import com.pnu.myweather.core.util.getLatestBaseDateTime
 import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
+import com.pnu.myweather.feature.component.Card
+import com.pnu.myweather.feature.component.MyButton
 import com.pnu.myweather.feature.developer.view.DeveloperScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
 import com.pnu.myweather.feature.setting.view.SettingScreenActivity
+import com.pnu.myweather.ui.theme.MyweatherTheme
 
 class HomeScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,20 +44,22 @@ class HomeScreenActivity : ComponentActivity() {
 
         setContent {
             val homeViewModel: HomeViewModel = viewModel()
-            HomeScreen(
-                viewModel = homeViewModel,
-                onGoToBriefing = {
-                    val weatherSummary = homeViewModel.weatherSummary.value
-                    val intent = Intent(this, BriefingScreenActivity::class.java).apply {
-                        putExtra("weatherSummary", weatherSummary)
-                        // TODO: tomorrowSummary도 필요하면 같이 넣기
+            MyweatherTheme {
+                HomeScreen(
+                    viewModel = homeViewModel,
+                    onGoToBriefing = {
+                        val weatherSummary = homeViewModel.weatherSummary.value
+                        val intent = Intent(this, BriefingScreenActivity::class.java).apply {
+                            putExtra("weatherSummary", weatherSummary)
+                            // TODO: tomorrowSummary도 필요하면 같이 넣기
+                        }
+                        startActivity(intent)
+                    },
+                    onGoToSetting = {
+                        startActivity(Intent(this, SettingScreenActivity::class.java))
                     }
-                    startActivity(intent)
-                },
-                onGoToSetting = {
-                    startActivity(Intent(this, SettingScreenActivity::class.java))
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -80,6 +86,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -102,35 +109,38 @@ fun HomeScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(30.dp)
         ) {
-            Text(baseDate)
-            Text(baseTime)
+            Card {
+                Column {
+                    when (weatherState) {
+                        is WeatherUiState.Loading -> {
+                            Text("날씨 불러오는 중...")
+                        }
 
-            when (weatherState) {
-                is WeatherUiState.Loading -> {
-                    Text("날씨 불러오는 중...")
-                }
+                        is WeatherUiState.Error -> {
+                            Text(BuildConfig.WEATHER_API_KEY)
+                            Text("에러 발생: ${(weatherState as WeatherUiState.Error).message}")
+                        }
 
-                is WeatherUiState.Error -> {
-                    Text(BuildConfig.WEATHER_API_KEY)
-                    Text("에러 발생: ${(weatherState as WeatherUiState.Error).message}")
-                }
+                        is WeatherUiState.Success -> {
+                            weatherSummary?.let {
+                                Text("현재 기온: ${it.temperature}")
+                                Text("하늘 상태: ${it.skyState}")
+                                Text("최고 기온: ${it.maxTemp}")
+                                Text("최저 기온: ${it.minTemp}")
+                                Text("습도: ${it.humidity}")
+                                Text("강수 확률: ${it.precipitation}")
 
-                is WeatherUiState.Success -> {
-                    weatherSummary?.let {
-                        Text("현재 기온: ${it.temperature}")
-                        Text("하늘 상태: ${it.skyState}")
-                        Text("최고 기온: ${it.maxTemp}")
-                        Text("최저 기온: ${it.minTemp}")
-                        Text("습도: ${it.humidity}")
-                        Text("강수 확률: ${it.precipitation}")
-                        Spacer(modifier = Modifier.padding(top = 16.dp))
+                            }
+                        }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.padding(top = 16.dp))
+            MyButton(onClick = onGoToBriefing) {
+                Text("브리핑")
+            }
             Button(onClick = {
                 ExternalAppUtils.shareText(
                     context,
@@ -147,9 +157,7 @@ fun HomeScreen(
             }) {
                 Text("상세보기")
             }
-            Button(onClick = onGoToBriefing, enabled = weatherState is WeatherUiState.Success) {
-                Text("브리핑")
-            }
+
         }
     }
 }
