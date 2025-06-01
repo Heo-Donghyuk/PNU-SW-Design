@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pnu.myweather.BuildConfig
-import com.pnu.myweather.core.util.ExternalAppUtils
 import com.pnu.myweather.core.util.getLatestBaseDateTime
 import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
@@ -122,7 +120,7 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 24.dp),
+                                    .padding(vertical = 130.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator()
@@ -146,26 +144,9 @@ fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.padding(top = 16.dp))
-            MyButton(onClick = onGoToBriefing) {
+            MyButton(onClick = onGoToBriefing, enabled = weatherState is WeatherUiState.Success) {
                 Text("브리핑")
             }
-            Button(onClick = {
-                ExternalAppUtils.shareText(
-                    context,
-                    "이 텍스트를 공유해요"
-                )
-            }) {
-                Text("텍스트 공유 기능 테스트")
-            }
-            Button(onClick = {
-                ExternalAppUtils.openBrowser(
-                    context,
-                    naverWeatherUrl
-                )
-            }) {
-                Text("상세보기")
-            }
-
         }
     }
 }
