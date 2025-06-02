@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore      //firestore가 unresolved
 
-import com.pnu.myweather.util.LocationPreference
+
 
 class SettingScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
