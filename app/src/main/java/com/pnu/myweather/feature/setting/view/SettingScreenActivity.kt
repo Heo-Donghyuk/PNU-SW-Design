@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore      //firestore가 unresolved
 
+import com.pnu.myweather.util.LocationPreference
+
 class SettingScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,7 @@ class SettingScreenActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(onGoBack: () -> Unit) {
+    val context = LocalContext.current  //추가
     val db = FirebaseFirestore.getInstance()
     val sidoList = remember { mutableStateListOf<String>() }
     val selectedSido = remember { mutableStateOf("") }
@@ -111,6 +114,47 @@ fun SettingScreen(onGoBack: () -> Unit) {
             if (dongList.isNotEmpty()) {
                 DropdownMenuBox(label = "동 선택", items = dongList, selected = selectedDong)
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(onClick = {
+                if (
+                    selectedSido.value.isNotEmpty() &&
+                    selectedGu.value.isNotEmpty() &&
+                    selectedDong.value.isNotEmpty()
+                ) {
+                    val docId = "${selectedSido.value}_${selectedGu.value}_${selectedDong.value}".replace(" ", "")
+                    db.collection("locations").document(docId).get()
+                        .addOnSuccessListener { document ->
+                            if (document != null && document.exists()) {
+                                val nx = (document["nx"] as? Long)?.toInt() ?: -1
+                                val ny = (document["ny"] as? Long)?.toInt() ?: -1
+                                val sido = document.getString("sido") ?: selectedSido.value
+                                val sigungu = document.getString("sigungu") ?: selectedGu.value
+                                val dong = document.getString("dong") ?: selectedDong.value
+
+                                LocationPreference.save(
+                                    context = context,
+                                    sido = sido,
+                                    gu = sigungu,
+                                    dong = dong,
+                                    nx = nx,
+                                    ny = ny
+                                )
+
+                                Log.d("설정", "저장됨: $sido $sigungu $dong ($nx, $ny)")
+                            } else {
+                                Log.w("설정", "해당 지역 정보 없음: $docId")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("설정", "Firestore 조회 실패", e)
+                        }
+                }
+            }) {
+                Text("위치 저장")
+            }
+
 
         }
     }
