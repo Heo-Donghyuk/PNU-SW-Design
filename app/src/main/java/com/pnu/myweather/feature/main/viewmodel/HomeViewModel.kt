@@ -71,7 +71,7 @@ class HomeViewModel : ViewModel() {
         fun findValue(category: String, from: List<ForecastItem>): String? =
             from.find { it.category == category }?.fcstValue
 
-        val currentTemp = findValue("TMP", earliest)?.let { "$it°C" }
+        val currentTemp = findValue("TMP", earliest)?.let { "$it°" }
         val currentSky = findValue("SKY", earliest)
         val currentPty = findValue("PTY", earliest)
         val currentWeather = if (currentSky != null && currentPty != null) {
@@ -84,8 +84,8 @@ class HomeViewModel : ViewModel() {
             .filter { it.category == "TMP" }
             .mapNotNull { it.fcstValue.toFloatOrNull() }
 
-        val minTemp = temperatureValues.minOrNull()?.let { "${it}°C" } ?: "정보 없음"
-        val maxTemp = temperatureValues.maxOrNull()?.let { "${it}°C" } ?: "정보 없음"
+        val minTemp = temperatureValues.minOrNull()?.let { "${it}°" } ?: "정보 없음"
+        val maxTemp = temperatureValues.maxOrNull()?.let { "${it}°" } ?: "정보 없음"
 
         _weatherSummary.value = WeatherSummary(
             temperature = currentTemp,
