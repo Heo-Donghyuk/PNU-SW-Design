@@ -1,30 +1,39 @@
 package com.pnu.myweather.feature.setting.view
 
-import android.util.Log
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
-
-import androidx.compose.material3.*
-
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.google.firebase.firestore.FirebaseFirestore      //firestore가 unresolved
-
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class SettingScreenActivity : ComponentActivity() {
@@ -123,7 +132,11 @@ fun SettingScreen(onGoBack: () -> Unit) {
                     selectedGu.value.isNotEmpty() &&
                     selectedDong.value.isNotEmpty()
                 ) {
-                    val docId = "${selectedSido.value}_${selectedGu.value}_${selectedDong.value}".replace(" ", "")
+                    val docId =
+                        "${selectedSido.value}_${selectedGu.value}_${selectedDong.value}".replace(
+                            " ",
+                            ""
+                        )
                     db.collection("locations").document(docId).get()
                         .addOnSuccessListener { document ->
                             if (document != null && document.exists()) {
