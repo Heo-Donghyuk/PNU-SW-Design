@@ -37,7 +37,7 @@ import com.pnu.myweather.feature.component.Card
 import com.pnu.myweather.feature.component.MyButton
 import com.pnu.myweather.feature.developer.view.DeveloperScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
-import com.pnu.myweather.feature.setting.view.SettingScreenActivity
+import com.pnu.myweather.feature.setting.view.SettingOverviewActivity
 import com.pnu.myweather.ui.theme.MyweatherTheme
 
 class HomeScreenActivity : ComponentActivity() {
@@ -58,7 +58,7 @@ class HomeScreenActivity : ComponentActivity() {
                         startActivity(intent)
                     },
                     onGoToSetting = {
-                        startActivity(Intent(this, SettingScreenActivity::class.java))
+                        startActivity(Intent(this, SettingOverviewActivity::class.java))
                     }
                 )
             }
