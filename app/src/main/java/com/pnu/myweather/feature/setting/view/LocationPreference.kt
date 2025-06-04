@@ -29,6 +29,12 @@ object LocationPreference {
             apply()
         }
     }
+    // 초기화
+    fun clear(context: Context) {
+        prefs(context).edit().clear().apply()
+    }
+
+
 
     // 불러오기
     fun getSido(context: Context): String = prefs(context).getString(KEY_SIDO, "") ?: ""

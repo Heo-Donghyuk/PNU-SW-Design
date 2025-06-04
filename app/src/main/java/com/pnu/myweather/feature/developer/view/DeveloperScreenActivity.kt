@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import com.pnu.myweather.feature.setting.view.LocationPreference
 
 
 class DeveloperScreenActivity : ComponentActivity() {
@@ -89,6 +90,16 @@ fun DeveloperScreen() {
                 }
             ) {
                 Text("미세먼지 API 호출 테스트")
+            }
+            Spacer(Modifier.padding(vertical = 12.dp))
+
+            // ✅ 위치 초기화 버튼 추가
+            Button(
+                onClick = {
+                    LocationPreference.clear(context)
+                }
+            ) {
+                Text("📍 위치 초기화")
             }
         }
     }
