@@ -145,6 +145,7 @@ fun SettingScreen(onGoBack: () -> Unit) {
                                 val sido = document.getString("sido") ?: selectedSido.value
                                 val sigungu = document.getString("sigungu") ?: selectedGu.value
                                 val dong = document.getString("dong") ?: selectedDong.value
+                                val station = document.getString("station") ?: ""
 
                                 LocationPreference.save(
                                     context = context,
@@ -152,7 +153,8 @@ fun SettingScreen(onGoBack: () -> Unit) {
                                     gu = sigungu,
                                     dong = dong,
                                     nx = nx,
-                                    ny = ny
+                                    ny = ny,
+                                    station = station
                                 )
 
                                 Log.d("설정", "저장됨: $sido $sigungu $dong ($nx, $ny)")

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.pnu.myweather.feature.setting.view.LocationPreference
 
 
@@ -66,6 +67,30 @@ fun DeveloperScreen() {
             }
 
             // 앞으로 여기 다른 개발자용 기능 버튼들도 추가하면 돼!
+            Spacer(modifier = Modifier.padding(vertical = 12.dp))
+
+            Button(
+                onClick = {
+                    // 미세먼지 API 호출
+                    val apiKey = "GyUs3LP7spCIM1xktKtSWLnFh3cEn%2FBdohl5oeZhTu6NmPVkrhQ22hXRoGs1%2BMzGnhi7lB0O1MNBzAb3WkgiSw%3D%3D"
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        try {
+                            val response = com.pnu.myweather.core.air.AirKoreaClient.apiService.getAirQuality(
+                                stationName = "종로구",
+                                serviceKey = apiKey
+                            )
+                            val item = response.response.body.items.firstOrNull()
+                            item?.let {
+                                android.util.Log.d("AirQuality", "종로구 - PM10: ${it.pm10Value}, PM2.5: ${it.pm25Value}")
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("AirQuality", "API 호출 실패", e)
+                        }
+                    }
+                }
+            ) {
+                Text("미세먼지 API 호출 테스트")
+            }
             Spacer(Modifier.padding(vertical = 12.dp))
 
             // ✅ 위치 초기화 버튼 추가
@@ -76,7 +101,6 @@ fun DeveloperScreen() {
             ) {
                 Text("📍 위치 초기화")
             }
-
         }
     }
 }
