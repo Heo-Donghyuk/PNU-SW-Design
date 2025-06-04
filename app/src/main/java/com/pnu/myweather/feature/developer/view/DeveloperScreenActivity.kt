@@ -7,6 +7,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pnu.myweather.feature.setting.view.LocationPreference
 
 
 class DeveloperScreenActivity : ComponentActivity() {
@@ -64,6 +66,17 @@ fun DeveloperScreen() {
             }
 
             // 앞으로 여기 다른 개발자용 기능 버튼들도 추가하면 돼!
+            Spacer(Modifier.padding(vertical = 12.dp))
+
+            // ✅ 위치 초기화 버튼 추가
+            Button(
+                onClick = {
+                    LocationPreference.clear(context)
+                }
+            ) {
+                Text("📍 위치 초기화")
+            }
+
         }
     }
 }
