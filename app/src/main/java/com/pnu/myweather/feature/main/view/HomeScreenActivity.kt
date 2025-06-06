@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pnu.myweather.BuildConfig
 import com.pnu.myweather.core.util.getLatestBaseDateTime
 import com.pnu.myweather.core.weather.WeatherUiState
@@ -41,11 +41,12 @@ import com.pnu.myweather.feature.setting.view.SettingOverviewActivity
 import com.pnu.myweather.ui.theme.MyweatherTheme
 
 class HomeScreenActivity : ComponentActivity() {
+    private val homeViewModel: HomeViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val homeViewModel: HomeViewModel = viewModel()
             MyweatherTheme {
                 HomeScreen(
                     viewModel = homeViewModel,
@@ -64,6 +65,16 @@ class HomeScreenActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        val (baseDate, baseTime) = getLatestBaseDateTime()
+        homeViewModel.fetchWeather(
+            context = this,
+            baseDate = baseDate,
+            baseTime = baseTime
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,13 +89,16 @@ fun HomeScreen(
     val weatherState by viewModel.weatherState.collectAsState()
     val weatherSummary by viewModel.weatherSummary.collectAsState()
     val (baseDate, baseTime) = getLatestBaseDateTime()
-    LaunchedEffect(Unit) {
+    val locationState by viewModel.locationState.collectAsState()
+    val airQuality by viewModel.airQualityState.collectAsState()
 
+    LaunchedEffect(locationState) {
         viewModel.fetchWeather(
+            context = context,
             baseDate = baseDate,
-            baseTime = baseTime,
-            nx = 98, ny = 76       // ex) 장전동 (부산 금정구)
+            baseTime = baseTime
         )
+
     }
 
     Scaffold(
@@ -135,9 +149,9 @@ fun HomeScreen(
                         is WeatherUiState.Success -> {
                             WeatherCard(
                                 weatherSummary = weatherSummary,
-                                location = "임시위치",
-                                fineDust = "임시",
-                                ultraFineDust = "임시",
+                                location = locationState.dong,
+                                fineDust = airQuality?.pm10Value ?: "—",
+                                ultraFineDust = airQuality?.pm25Value ?: "—",
                                 weatherURL = naverWeatherUrl
                             )
                         }

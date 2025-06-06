@@ -108,8 +108,10 @@ fun WeatherCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text("미세먼지 $fineDust", fontSize = 16.sp)
-                Text("초미세먼지 $ultraFineDust", fontSize = 16.sp)
+                DustInfo(
+                    fineDust = fineDust,
+                    ultraFineDust = ultraFineDust
+                )
             }
 
             // 우측 아이콘
@@ -144,5 +146,48 @@ fun WeatherCard(
             fontSize = 14.sp,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+fun DustInfo(
+    fineDust: String,
+    ultraFineDust: String
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "미세먼지 ",
+            )
+            Text(
+                text = fineDust,
+                fontWeight = FontWeight.SemiBold,
+                color = gradeToColor(fineDust)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 초미세먼지
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "초미세먼지 ",
+            )
+            Text(
+                text = ultraFineDust,
+                fontWeight = FontWeight.SemiBold,
+                color = gradeToColor(ultraFineDust)
+            )
+        }
+    }
+}
+
+fun gradeToColor(grade: String): Color {
+    return when (grade) {
+        "좋음" -> Color(0xFF4CAF50) // 녹색
+        "보통" -> Color(0xFFFFC107) // 주황
+        "나쁨" -> Color(0xFFFF5722) // 빨강(밝은)
+        "매우 나쁨" -> Color(0xFFD32F2F) // 진한 빨강
+        else -> Color.Unspecified // 등급이 없거나 알 수 없을 때
     }
 }
