@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pnu.myweather.BuildConfig
+import com.pnu.myweather.core.air.AirKoreaClient
+import com.pnu.myweather.core.air.AirQuality
 import com.pnu.myweather.core.util.getWeatherDescription
 import com.pnu.myweather.core.weather.ForecastItem
 import com.pnu.myweather.core.weather.WeatherApiClient
@@ -12,9 +14,11 @@ import com.pnu.myweather.core.weather.WeatherSummary
 import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.setting.model.LocationState
 import com.pnu.myweather.feature.setting.view.LocationPreference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeViewModel : ViewModel() {
     private val _locationState = MutableStateFlow(LocationState())
@@ -29,14 +33,9 @@ class HomeViewModel : ViewModel() {
     private val _weatherSummary = MutableStateFlow<WeatherSummary?>(null)
     val weatherSummary: StateFlow<WeatherSummary?> = _weatherSummary
 
-    /**
-     *  SharedPreferences (LocationPreference)에서 저장된 값을 읽어서
-     *  _locationState, _naverWeatherUrl을 업데이트한다.
-     *
-     *  이 함수는 반드시 Context를 인자로 받아야 하며,
-     *  호출 시점에 Activity/Composable에서 `LocalContext.current` 등을 통해
-     *  넘겨 줘야 한다.
-     */
+    private val _airQualityState = MutableStateFlow<AirQuality?>(null)
+    val airQualityState: StateFlow<AirQuality?> = _airQualityState
+
     fun loadLocation(context: Context) {
         val sido = LocationPreference.getSido(context)
         val gu = LocationPreference.getGu(context)
@@ -87,6 +86,7 @@ class HomeViewModel : ViewModel() {
                 )
                 val items = response.response.body.items.item
                 processWeatherData(items)
+                fetchAirQuality(context) //날씨 호출이 성공했으면, 바로 미세먼지 API도 호출
             } catch (e: Exception) {
                 _weatherState.value = WeatherUiState.Error(e.message ?: "알 수 없는 에러")
             }
@@ -135,5 +135,59 @@ class HomeViewModel : ViewModel() {
         )
 
         _weatherState.value = WeatherUiState.Success(filteredGrouped)
+    }
+
+    private fun fetchAirQuality(context: Context) {
+        loadLocation(context)
+        val stationName = _locationState.value.station.ifBlank { return }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val serviceKey =
+                    "GyUs3LP7spCIM1xktKtSWLnFh3cEn/Bdohl5oeZhTu6NmPVkrhQ22hXRoGs1+MzGnhi7lB0O1MNBzAb3WkgiSw=="
+                val response = AirKoreaClient.apiService.getAirQuality(
+                    stationName = stationName,
+                    serviceKey = serviceKey
+                )
+                val item = response.response.body.items.firstOrNull()
+                if (item != null) {
+                    val pm10Int = item.pm10Value?.toIntOrNull() ?: -1
+                    val pm25Int = item.pm25Value?.toIntOrNull() ?: -1
+
+                    val pm10Grade = getAirGrade(pm10Int, isPM25 = false)
+                    val pm25Grade = getAirGrade(pm25Int, isPM25 = true)
+
+                    val airQuality = AirQuality(
+                        pm10Value = pm10Grade,
+                        pm25Value = pm25Grade,
+                    )
+                    withContext(Dispatchers.Main) {
+                        _airQualityState.value = airQuality
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _airQualityState.value = null
+                }
+            }
+        }
+    }
+
+    private fun getAirGrade(value: Int, isPM25: Boolean): String {
+        return if (isPM25) {
+            when (value) {
+                in 0..15 -> "좋음"
+                in 16..35 -> "보통"
+                in 36..75 -> "나쁨"
+                else -> "매우 나쁨"
+            }
+        } else {
+            when (value) {
+                in 0..30 -> "좋음"
+                in 31..80 -> "보통"
+                in 81..150 -> "나쁨"
+                else -> "매우 나쁨"
+            }
+        }
     }
 }

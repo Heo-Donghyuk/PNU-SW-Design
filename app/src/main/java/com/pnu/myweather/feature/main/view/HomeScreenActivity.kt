@@ -90,7 +90,8 @@ fun HomeScreen(
     val weatherSummary by viewModel.weatherSummary.collectAsState()
     val (baseDate, baseTime) = getLatestBaseDateTime()
     val locationState by viewModel.locationState.collectAsState()
-    // locationState가 바뀔 때마다 fetchWeather 호출
+    val airQuality by viewModel.airQualityState.collectAsState()
+
     LaunchedEffect(locationState) {
         viewModel.fetchWeather(
             context = context,
@@ -149,8 +150,8 @@ fun HomeScreen(
                             WeatherCard(
                                 weatherSummary = weatherSummary,
                                 location = locationState.dong,
-                                fineDust = "임시",
-                                ultraFineDust = "임시",
+                                fineDust = airQuality?.pm10Value ?: "—",
+                                ultraFineDust = airQuality?.pm25Value ?: "—",
                                 weatherURL = naverWeatherUrl
                             )
                         }
