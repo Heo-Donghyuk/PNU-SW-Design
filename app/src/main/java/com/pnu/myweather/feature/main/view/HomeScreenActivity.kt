@@ -134,7 +134,7 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 130.dp),
+                                    .padding(vertical = 152.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator()
