@@ -3,6 +3,7 @@ package com.pnu.myweather
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.pnu.myweather.core.gemma.GemmaModelLoader
 import com.pnu.myweather.core.gemma.GemmaSessionHolder
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO) // 다크모두 불허
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
