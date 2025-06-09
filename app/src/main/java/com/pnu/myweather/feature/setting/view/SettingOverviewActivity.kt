@@ -64,11 +64,23 @@ fun SettingOverviewScreen(
     onEditClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val sido = LocationPreference.getSido(context)
-    val gu = LocationPreference.getGu(context)
-    val dong = LocationPreference.getDong(context)
-    val nx = LocationPreference.getNx(context)
-    val ny = LocationPreference.getNy(context)
+
+    // 지역 정보를 remember state로 저장
+    var sido by remember { mutableStateOf("") }
+    var gu by remember { mutableStateOf("") }
+    var dong by remember { mutableStateOf("") }
+    var nx by remember { mutableStateOf(-1) }
+    var ny by remember { mutableStateOf(-1) }
+
+    //refreshKey가 바뀔 때마다 최신 값 로드
+    LaunchedEffect(refreshKey) {
+        sido = LocationPreference.getSido(context)
+        gu = LocationPreference.getGu(context)
+        dong = LocationPreference.getDong(context)
+        nx = LocationPreference.getNx(context)
+        ny = LocationPreference.getNy(context)
+    }
+
 
     val isConfigured = sido.isNotBlank() && gu.isNotBlank() && dong.isNotBlank()
 
