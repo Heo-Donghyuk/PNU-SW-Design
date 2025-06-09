@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -20,6 +21,8 @@ import com.pnu.myweather.ui.theme.MyweatherTheme
 import com.pnu.myweather.ui.theme.White
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+
 
 class SettingScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,9 +118,12 @@ fun SettingScreen(onGoBack: () -> Unit) {
                     }
                     if (dongList.isNotEmpty()) {
                         DropdownMenuBox(label = "동 선택", items = dongList, selected = selectedDong)
-                        Spacer(modifier = Modifier.height(24.dp))
-                    }
 
+                    }
+                }
+            }
+
+                    Spacer(modifier = Modifier.height(24.dp))
                     MyButton(onClick = {
                         if (selectedSido.value.isNotEmpty() && selectedGu.value.isNotEmpty() && selectedDong.value.isNotEmpty()) {
                             val docId = "${selectedSido.value}_${selectedGu.value}_${selectedDong.value}".replace(" ", "")
@@ -156,8 +162,6 @@ fun SettingScreen(onGoBack: () -> Unit) {
                 }
             }
         }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,16 +175,25 @@ fun DropdownMenuBox(label: String, items: List<String>, selected: MutableState<S
             value = selected.value,
             onValueChange = {},
             readOnly = true,
-            label = { Text(label) },
+            label = { Text(label, fontSize = 16.sp) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(),
+                .menuAnchor()
+                .height(56.dp),
             colors = ExposedDropdownMenuDefaults.textFieldColors(
-                focusedContainerColor = White,
-                unfocusedContainerColor = White
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
+                errorContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
             ),
-            shape = MaterialTheme.shapes.medium
+            shape = RoundedCornerShape(16.dp),
+            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp)
+
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -188,7 +201,7 @@ fun DropdownMenuBox(label: String, items: List<String>, selected: MutableState<S
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item) },
+                    text = { Text(item,fontSize = 15.sp) },
                     onClick = {
                         selected.value = item
                         expanded = false
