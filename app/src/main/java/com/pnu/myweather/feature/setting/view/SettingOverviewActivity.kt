@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.pnu.myweather.ui.theme.White
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 import com.pnu.myweather.ui.theme.MyweatherTheme
 
@@ -62,18 +64,30 @@ fun SettingOverviewScreen(
     onEditClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val sido = LocationPreference.getSido(context)
-    val gu = LocationPreference.getGu(context)
-    val dong = LocationPreference.getDong(context)
-    val nx = LocationPreference.getNx(context)
-    val ny = LocationPreference.getNy(context)
+
+    // 지역 정보를 remember state로 저장
+    var sido by remember { mutableStateOf("") }
+    var gu by remember { mutableStateOf("") }
+    var dong by remember { mutableStateOf("") }
+    var nx by remember { mutableStateOf(-1) }
+    var ny by remember { mutableStateOf(-1) }
+
+    //refreshKey가 바뀔 때마다 최신 값 로드
+    LaunchedEffect(refreshKey) {
+        sido = LocationPreference.getSido(context)
+        gu = LocationPreference.getGu(context)
+        dong = LocationPreference.getDong(context)
+        nx = LocationPreference.getNx(context)
+        ny = LocationPreference.getNy(context)
+    }
+
 
     val isConfigured = sido.isNotBlank() && gu.isNotBlank() && dong.isNotBlank()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("설정") },
+                title = { Text("설정", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onGoBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "뒤로가기")
@@ -87,7 +101,7 @@ fun SettingOverviewScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isConfigured) {
@@ -99,21 +113,21 @@ fun SettingOverviewScreen(
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("설정 지역", style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(8.dp))
-                            Text(text = "$sido $gu $dong")
+                            Text(text = "$sido $gu $dong", fontSize = 16.sp)
                             Spacer(Modifier.height(4.dp))
-                            Text(text = "좌표(x/y): $nx / $ny")
+                            Text(text = "좌표(x/y): $nx / $ny", fontSize = 14.sp)
                         }
                     }
                 //}
 
                 Spacer(Modifier.height(32.dp))
             } else {
-                Text("아직 지역 설정이 완료되지 않았습니다.")
+                Text("아직 지역 설정이 완료되지 않았습니다.", fontSize = 14.sp)
                 Spacer(Modifier.height(32.dp))
             }
 
             com.pnu.myweather.feature.component.MyButton(onClick = onEditClick) {
-                Text("직접 설정", color = White)
+                Text("직접 설정", color = White, fontSize = 16.sp)
             }
         }
     }
