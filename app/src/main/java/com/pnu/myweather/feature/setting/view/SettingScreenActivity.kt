@@ -18,6 +18,8 @@ import com.pnu.myweather.feature.component.Card
 import com.pnu.myweather.feature.component.MyButton
 import com.pnu.myweather.ui.theme.MyweatherTheme
 import com.pnu.myweather.ui.theme.White
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 
 class SettingScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +89,7 @@ fun SettingScreen(onGoBack: () -> Unit) {
 
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text("지역 설정") },
+            title = { Text("지역 설정", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
             navigationIcon = {
                 IconButton(onClick = onGoBack) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = "뒤로 가기")
@@ -101,6 +103,8 @@ fun SettingScreen(onGoBack: () -> Unit) {
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
+            Spacer(modifier = Modifier.height(24.dp))
+
             Card {
                 Column {
                     DropdownMenuBox(label = "시도 선택", items = sidoList, selected = selectedSido)
@@ -147,7 +151,7 @@ fun SettingScreen(onGoBack: () -> Unit) {
                                 }
                         }
                     }) {
-                        Text("위치 저장", color = White)
+                        Text("위치 저장", color = White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -172,7 +176,11 @@ fun DropdownMenuBox(label: String, items: List<String>, selected: MutableState<S
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(),
-            colors = ExposedDropdownMenuDefaults.textFieldColors()
+            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                focusedContainerColor = White,
+                unfocusedContainerColor = White
+            ),
+            shape = MaterialTheme.shapes.medium
         )
         ExposedDropdownMenu(
             expanded = expanded,
