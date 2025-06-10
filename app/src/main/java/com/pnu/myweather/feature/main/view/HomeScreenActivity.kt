@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,8 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pnu.myweather.BuildConfig
+import com.pnu.myweather.R
 import com.pnu.myweather.core.util.getLatestBaseDateTime
 import com.pnu.myweather.core.weather.WeatherUiState
 import com.pnu.myweather.feature.briefing.view.BriefingScreenActivity
@@ -38,6 +42,7 @@ import com.pnu.myweather.feature.component.MyButton
 import com.pnu.myweather.feature.developer.view.DeveloperScreenActivity
 import com.pnu.myweather.feature.main.viewmodel.HomeViewModel
 import com.pnu.myweather.feature.setting.view.SettingOverviewActivity
+import com.pnu.myweather.feature.setting.view.SettingScreenActivity
 import com.pnu.myweather.ui.theme.MyweatherTheme
 
 class HomeScreenActivity : ComponentActivity() {
@@ -127,40 +132,75 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(30.dp)
         ) {
-            Card {
-                Column {
-                    when (weatherState) {
-                        is WeatherUiState.Loading -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 152.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+            if (locationState.nx > 0 && locationState.ny > 0) {
+                Card {
+                    Column {
+                        when (weatherState) {
+                            is WeatherUiState.Loading -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 152.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
-                        }
 
-                        is WeatherUiState.Error -> {
-                            Text(BuildConfig.WEATHER_API_KEY)
-                            Text("에러 발생: ${(weatherState as WeatherUiState.Error).message}")
-                        }
+                            is WeatherUiState.Error -> {
+                                Text(BuildConfig.WEATHER_API_KEY)
+                                Text("에러 발생: ${(weatherState as WeatherUiState.Error).message}")
+                            }
 
-                        is WeatherUiState.Success -> {
-                            WeatherCard(
-                                weatherSummary = weatherSummary,
-                                location = locationState.dong,
-                                fineDust = airQuality?.pm10Value ?: "—",
-                                ultraFineDust = airQuality?.pm25Value ?: "—",
-                                weatherURL = naverWeatherUrl
-                            )
+                            is WeatherUiState.Success -> {
+                                WeatherCard(
+                                    weatherSummary = weatherSummary,
+                                    location = locationState.dong,
+                                    fineDust = airQuality?.pm10Value ?: "—",
+                                    ultraFineDust = airQuality?.pm25Value ?: "—",
+                                    weatherURL = naverWeatherUrl
+                                )
+                            }
                         }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.padding(top = 16.dp))
-            MyButton(onClick = onGoToBriefing, enabled = weatherState is WeatherUiState.Success) {
-                Text("브리핑")
+                Spacer(modifier = Modifier.padding(top = 16.dp))
+                MyButton(
+                    onClick = onGoToBriefing,
+                    enabled = weatherState is WeatherUiState.Success
+                ) {
+                    Text("브리핑")
+                }
+            } else {
+                Card {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.snow),
+                            contentDescription = "날씨 아이콘",
+                            modifier = Modifier.fillMaxSize(0.3f)
+                        )
+                        Spacer(modifier = Modifier.padding(top = 16.dp))
+                        Text("날씨 정보 제공을 위해\n지역 설정이 필요해요", fontWeight = FontWeight.Bold)
+                    }
+                }
+                Spacer(modifier = Modifier.padding(top = 16.dp))
+                MyButton(
+                    onClick = {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                SettingScreenActivity::class.java
+                            )
+                        )
+                    },
+                ) {
+                    Text("설정하러 가기")
+                }
             }
         }
     }
