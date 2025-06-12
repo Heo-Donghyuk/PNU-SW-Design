@@ -1,27 +1,49 @@
-
 package com.pnu.myweather.feature.setting.view
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pnu.myweather.feature.component.Card
 import com.pnu.myweather.feature.component.MyButton
 import com.pnu.myweather.ui.theme.MyweatherTheme
 import com.pnu.myweather.ui.theme.White
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.graphics.Color
 
 
 class SettingScreenActivity : ComponentActivity() {
@@ -123,45 +145,49 @@ fun SettingScreen(onGoBack: () -> Unit) {
                 }
             }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    MyButton(onClick = {
-                        if (selectedSido.value.isNotEmpty() && selectedGu.value.isNotEmpty() && selectedDong.value.isNotEmpty()) {
-                            val docId = "${selectedSido.value}_${selectedGu.value}_${selectedDong.value}".replace(" ", "")
-                            db.collection("locations").document(docId).get()
-                                .addOnSuccessListener { document ->
-                                    if (document != null && document.exists()) {
-                                        val nx = (document["nx"] as? Long)?.toInt() ?: -1
-                                        val ny = (document["ny"] as? Long)?.toInt() ?: -1
-                                        val sido = document.getString("sido") ?: selectedSido.value
-                                        val gu = document.getString("sigungu") ?: selectedGu.value
-                                        val dong = document.getString("dong") ?: selectedDong.value
-                                        val station = document.getString("station") ?: ""
+            Spacer(modifier = Modifier.height(24.dp))
+            MyButton(onClick = {
+                if (selectedSido.value.isNotEmpty() && selectedGu.value.isNotEmpty() && selectedDong.value.isNotEmpty()) {
+                    val docId =
+                        "${selectedSido.value}_${selectedGu.value}_${selectedDong.value}".replace(
+                            " ",
+                            ""
+                        )
+                    db.collection("locations").document(docId).get()
+                        .addOnSuccessListener { document ->
+                            if (document != null && document.exists()) {
+                                val nx = (document["nx"] as? Long)?.toInt() ?: -1
+                                val ny = (document["ny"] as? Long)?.toInt() ?: -1
+                                val sido = document.getString("sido") ?: selectedSido.value
+                                val gu = document.getString("sigungu") ?: selectedGu.value
+                                val dong = document.getString("dong") ?: selectedDong.value
+                                val station = document.getString("station") ?: ""
 
-                                        LocationPreference.save(
-                                            context = context,
-                                            sido = sido,
-                                            gu = gu,
-                                            dong = dong,
-                                            nx = nx,
-                                            ny = ny,
-                                            station = station
-                                        )
-
-                                        Log.d("설정", "저장됨: $sido $gu $dong ($nx, $ny)")
-                                    } else {
-                                        Log.w("설정", "해당 지역 정보 없음: $docId")
-                                    }
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("설정", "Firestore 조회 실패", e)
-                                }
+                                LocationPreference.save(
+                                    context = context,
+                                    sido = sido,
+                                    gu = gu,
+                                    dong = dong,
+                                    nx = nx,
+                                    ny = ny,
+                                    station = station
+                                )
+                                Toast.makeText(context, "위치가 저장되었습니다", Toast.LENGTH_SHORT).show()
+                                Log.d("설정", "저장됨: $sido $gu $dong ($nx, $ny)")
+                            } else {
+                                Log.w("설정", "해당 지역 정보 없음: $docId")
+                            }
                         }
-                    }) {
-                        Text("위치 저장", color = White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                    }
+                        .addOnFailureListener { e ->
+                            Log.e("설정", "Firestore 조회 실패", e)
+                        }
                 }
+            }) {
+                Text("위치 저장", color = White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
         }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -200,7 +226,7 @@ fun DropdownMenuBox(label: String, items: List<String>, selected: MutableState<S
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item,fontSize = 15.sp) },
+                    text = { Text(item, fontSize = 15.sp) },
                     onClick = {
                         selected.value = item
                         expanded = false
