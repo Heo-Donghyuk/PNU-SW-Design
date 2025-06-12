@@ -1,29 +1,47 @@
 package com.pnu.myweather.feature.setting.view
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.pnu.myweather.ui.theme.White
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-
+import com.pnu.myweather.feature.component.Card
+import com.pnu.myweather.feature.component.MyButton
 import com.pnu.myweather.ui.theme.MyweatherTheme
+import com.pnu.myweather.ui.theme.White
 
 class SettingOverviewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,20 +123,39 @@ fun SettingOverviewScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isConfigured) {
-               // Card(
-                 //   modifier = Modifier.fillMaxWidth(),
-                   // elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                //) {
-                    com.pnu.myweather.feature.component.Card {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text("설정 지역", style = MaterialTheme.typography.titleMedium)
-                            Spacer(Modifier.height(8.dp))
-                            Text(text = "$sido $gu $dong", fontSize = 16.sp)
-                            Spacer(Modifier.height(4.dp))
-                            Text(text = "좌표(x/y): $nx / $ny", fontSize = 14.sp)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Filled.Place,
+                                    contentDescription = "위치 아이콘",
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
+                                Text(
+                                    text = "$sido $gu $dong",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("좌표(x/y)", style = MaterialTheme.typography.bodyMedium)
+                            Text("$nx/$ny", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                         }
                     }
-                //}
+                }
 
                 Spacer(Modifier.height(32.dp))
             } else {
@@ -126,7 +163,7 @@ fun SettingOverviewScreen(
                 Spacer(Modifier.height(32.dp))
             }
 
-            com.pnu.myweather.feature.component.MyButton(onClick = onEditClick) {
+            MyButton(onClick = onEditClick) {
                 Text("직접 설정", color = White, fontSize = 16.sp)
             }
         }
