@@ -179,8 +179,7 @@ fun DropdownMenuBox(label: String, items: List<String>, selected: MutableState<S
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor()
-                .height(56.dp),
+                .menuAnchor(),
             colors = ExposedDropdownMenuDefaults.textFieldColors(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
