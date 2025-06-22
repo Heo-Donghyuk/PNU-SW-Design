@@ -103,7 +103,7 @@ fun BriefingScreen(
             response = responseState
 
             LaunchedEffect(gemmaState) {
-                if (gemmaState is GemmaState.Ready) {
+                if (!session.responding.value) {
                     session.sendQuery(prompt)
                 }
             }
